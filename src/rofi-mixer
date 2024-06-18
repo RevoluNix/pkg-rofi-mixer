@@ -1,0 +1,27 @@
+#!/bin/sh
+
+menu(){
+	printf "Heardphone\n"
+	printf "Microphone\n"
+}
+
+main() {
+	choice=$(menu | rofi -dmenu | cut -d. -f1)
+
+	case $choice in
+		"Heardphone")
+      focus-rofi &
+			rofi-pulse-select sink
+      main
+			break
+			;;
+		"Microphone")
+      focus-rofi &
+			rofi-pulse-select source
+      main
+			break
+			;;
+	esac
+}
+
+main
