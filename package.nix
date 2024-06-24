@@ -1,4 +1,5 @@
 {
+  fetchurl,
   stdenv,
   lib,
   callPackage,
@@ -46,11 +47,14 @@ stdenv.mkDerivation (finalAttrs: {
     runHook postInstall
   '';
   # ----------------------------------------------------------------- #
-  postFixup = ''
+  postFixup = let focus-rofi = fetchurl {
+    url = "https://github.com/RevoluNix/pkg-focus-rofi/releases/download/testing-2024.06.24-09.38.57/package.nix";
+    sha256 = "4360ca6c7ddd2e54126947a00aae82577bdbf74249256b42833bc7ec9c9be941";
+  }; in ''
     wrapProgram $out/bin/${finalAttrs.pname} \
       --prefix PATH : ${lib.makeBinPath [
         rofi-wayland
-        (callPackage ../focus-rofi/package.nix { })
+        (callPackage focus-rofi { })
       ]}
   '';
   # ----------------------------------------------------------------- #
