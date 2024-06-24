@@ -8,8 +8,10 @@ jobs:
     name: auto create and push release
     runs-on: ubuntu-22.04
     steps:
+      - uses: cachix/install-nix-action@v27
+
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@master
           
       - name: Generate Release version from date
         id: date
@@ -21,12 +23,11 @@ jobs:
       - name: Generate tar.gz from src
         id: generate_tar
         run: |
-          cd ./src/
           PKG_NAME="$(basename "${{ github.repository }}" | sed 's/pkg-//g')"
           FILE_NAME="src-${PKG_NAME}.tar.gz"
           echo "PKG_NAME=$PKG_NAME" >> $GITHUB_ENV
           echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
-          tar -czvf ${FILE_NAME} *
+          tar -czvf ${FILE_NAME} src/
           FILE_HASH=$(sha256sum ${FILE_NAME} | cut -d ' ' -f 1)
           echo "FILE_HASH=$FILE_HASH" >> $GITHUB_ENV
 
@@ -38,7 +39,11 @@ jobs:
               | sed 's/\//\\\//g'
           )
           SRC="src = fetchurl {\n    url = \"${URL}\";\n    sha256 = \"${{ env.FILE_HASH }}\";\n  }"
-          sed -i "s/src = .\/src/${SRC}/g" ./package.nix
+          sed -i "s/src = .\/src/src = .\/${{ env.FILE_NAME }}/g" ./package.nix
+          git add ./${{ env.FILE_NAME }}
+          nix build
+          git reset ./${{ env.FILE_NAME }}
+          sed -i "s/src = .\/${{ env.FILE_NAME }}/${SRC}/g" ./package.nix
           sed -i "s/version = \".*\";/version = \"${{ env.TAG_NAME }}\";/g" ./package.nix
           sed -i "1s/.*/{\n  fetchurl,/" ./package.nix
 
@@ -49,7 +54,7 @@ jobs:
           tag_name: ${{ env.TAG_NAME }}
           prerelease: false
           files: |
-            ./src/${{ env.FILE_NAME }}
+            ./${{ env.FILE_NAME }}
             ./package.nix
 
       - name: Clone RevoluNixPKGS

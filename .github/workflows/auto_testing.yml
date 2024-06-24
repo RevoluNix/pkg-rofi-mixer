@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-    - nightly
+    - testing
 
 jobs:
   auto_ralease:
@@ -13,12 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@master
         with:
-          ref: nightly
+          ref: testing
           
       - name: Generate Release version from date
         id: date
         run: |
-          TAG_NAME="nightly-$(date +'%Y.%m.%d-%H.%M.%S')"
+          TAG_NAME="testing-$(date +'%Y.%m.%d-%H.%M.%S')"
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
           echo "Tag name will be: $TAG_NAME"
       
@@ -62,7 +62,7 @@ jobs:
       - name: Clone RevoluNixPKGS
         uses: actions/checkout@master
         with:
-          ref: nightly
+          ref: testing
           repository: RevoluNix/revolunixpkgs
           token: ${{ secrets.RevoluNixPKGS_TOKEN }}
 
@@ -85,4 +85,4 @@ jobs:
         with:
           github_token: ${{ secrets.RevoluNixPKGS_TOKEN }}
           repository: RevoluNix/revolunixpkgs
-          branch: nightly
+          branch: testing
