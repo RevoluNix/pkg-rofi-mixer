@@ -45,7 +45,6 @@ jobs:
           git reset ./${{ env.FILE_NAME }}
           sed -i "s/src = .\/${{ env.FILE_NAME }}/${SRC}/g" ./package.nix
           sed -i "s/version = \".*\";/version = \"${{ env.TAG_NAME }}\";/g" ./package.nix
-          sed -i "1s/.*/{\n  fetchurl,/" ./package.nix
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
