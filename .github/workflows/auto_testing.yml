@@ -47,6 +47,7 @@ jobs:
           git reset ./${{ env.FILE_NAME }}
           sed -i "s/src = .\/${{ env.FILE_NAME }}/${SRC}/g" ./package.nix
           sed -i "s/version = \".*\";/version = \"${{ env.TAG_NAME }}\";/g" ./package.nix
+          sed -i "1s/.*/{\n  fetchurl,/" ./package.nix
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -57,31 +58,3 @@ jobs:
           files: |
             ./${{ env.FILE_NAME }}
             ./package.nix
-
-      - name: Clone RevoluNixPKGS
-        uses: actions/checkout@master
-        with:
-          ref: testing
-          repository: RevoluNix/revolunixpkgs
-          token: ${{ secrets.RevoluNixPKGS_TOKEN }}
-
-      - name: Update RevoluNixPKGS
-        id: update_pkgs
-        run: |
-          git config --global user.email "${{ github.event.pusher.email }}"
-          git config --global user.name "${{ github.event.pusher.name }}"
-          
-          URL="https://github.com/${{ github.repository }}/releases/download/${{ env.TAG_NAME }}/package.nix"
-          rm -rf ./pkgs/${{ env.PKG_NAME }}
-          mkdir -p ./pkgs/${{ env.PKG_NAME }}
-          wget -O ./pkgs/${{ env.PKG_NAME }}/package.nix $URL
-          
-          git add .
-          git commit -m "feat: Update/Upload ${{ env.PKG_NAME }} package"
-          
-      - name: Push RevoluNixPKGS changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.RevoluNixPKGS_TOKEN }}
-          repository: RevoluNix/revolunixpkgs
-          branch: testing

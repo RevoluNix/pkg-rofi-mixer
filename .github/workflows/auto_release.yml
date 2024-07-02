@@ -45,6 +45,7 @@ jobs:
           git reset ./${{ env.FILE_NAME }}
           sed -i "s/src = .\/${{ env.FILE_NAME }}/${SRC}/g" ./package.nix
           sed -i "s/version = \".*\";/version = \"${{ env.TAG_NAME }}\";/g" ./package.nix
+          sed -i "1s/.*/{\n  fetchurl,/" ./package.nix
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -59,6 +60,7 @@ jobs:
       - name: Clone RevoluNixPKGS
         uses: actions/checkout@master
         with:
+          ref: testing
           repository: RevoluNix/revolunixpkgs
           token: ${{ secrets.RevoluNixPKGS_TOKEN }}
 
@@ -81,3 +83,4 @@ jobs:
         with:
           github_token: ${{ secrets.RevoluNixPKGS_TOKEN }}
           repository: RevoluNix/revolunixpkgs
+          branch: testing
